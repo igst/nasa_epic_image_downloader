@@ -73,11 +73,7 @@ $config->getFinder()
         __DIR__.'/rector.php',
         __DIR__.'/composer-unused.php',
     ])
-    ->in('build')
-    ->in('migrations')
-    ->in('src')
-    ->in('tests')
-    ->in('tools');
+    ->in('src');
 
 $config->setCacheFile(__DIR__.'/.build/php-cs-fixer/.php-cs-fixer.cache');
 
