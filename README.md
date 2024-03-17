@@ -9,10 +9,8 @@
 #### 1. First, clone the repository
 `git clone git@github.com:igst/nasa_epic_image_downloader.git`
 
-
 #### 2. Go to project directory
 `cd nasa_epic_image_downloader`
-
 
 #### 3. Copy `.env.local.dist` to `.env.local`
 
@@ -33,7 +31,11 @@ NASA_EPIC_API_KEY=YOUR_NASA_API_KEY
 NASA_EPIC_IMAGE_STORAGE_DIRECTORY=var/storage
 ```
 
-#### 5. Use the fetch command
+#### 5. Run composer install
+
+`symfony composer install`
+
+#### 6. Use the fetch command
 
 Example 1 (provide a target directory and provide a specific date):
 
