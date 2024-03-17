@@ -22,7 +22,7 @@ final readonly class ImageMetadata
         Assert::notEmpty($date);
     }
 
-    public static function fromResponse(array $response)
+    public static function fromResponse(array $response): self
     {
         Assert::keyExists($response, 'identifier');
         Assert::keyExists($response, 'caption');
