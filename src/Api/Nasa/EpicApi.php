@@ -19,29 +19,28 @@ final readonly class EpicApi implements EpicApiInterface
     ) {
     }
 
-    /**
-     * @return array<ImageMetadata>
-     */
-    public function getRecentImagesMetadata(): array
+    public function getLastAvailableDate(): \DateTimeInterface
     {
-        $this->logger->debug('Fetching recent images metadata');
+        $this->logger->debug('Fetching last available date');
 
         $response = $this->nasaEpicApi->request(
             Request::METHOD_GET,
-            'api/natural/images',
+            'api/natural/all',
         );
 
-        $imagesMetadata = [];
+        $response = $response->toArray();
 
-        $response = $response->toArray(false);
+        $dates = [];
 
-        $this->logger->debug('Fetched recent images metadata.', $response);
-
-        foreach ($response as $imageMetadataArray) {
-            $imagesMetadata[] = ImageMetadata::fromResponse($imageMetadataArray);
+        foreach ($response as $dateItem) {
+            $dates[] = new \DateTimeImmutable($dateItem['date']);
         }
 
-        return $imagesMetadata;
+        $date = max($dates);
+
+        $this->logger->debug('Fetched last available date', ['date' => $date]);
+
+        return $date;
     }
 
     /**
@@ -69,21 +68,26 @@ final readonly class EpicApi implements EpicApiInterface
         return $imagesMetadata;
     }
 
-    public function downloadImage(ImageMetadata $imageMetadata, string $targetFolder): void
+    public function downloadImage(ImageMetadata $imageMetadata, string $targetFolder): string
     {
-        $targetFolder = $this->nasaEpicImageStorageDirectory.\DIRECTORY_SEPARATOR.$targetFolder;
+        $filename = $imageMetadata->getImage().'.png';
+        $day = sprintf('%02d', $imageMetadata->getDate()->format('d'));
+        $month = sprintf('%02d', $imageMetadata->getDate()->format('m'));
+        $year = $imageMetadata->getDate()->format('Y');
+
+        Assert::range((int) $year, 1960, 2040);
+
+        $targetFolder = sprintf('%s/%s/%d%d%d/', $this->nasaEpicImageStorageDirectory, $targetFolder, $year, $month, $day);
 
         $this->logger->debug(sprintf('Downloading image %s to directory %s', $imageMetadata->getImage(), $targetFolder));
-
-        $filename = $imageMetadata->getImage().'.png';
 
         $response = $this->nasaEpicApi->request(
             Request::METHOD_GET,
             sprintf(
                 'archive/natural/%d/%02d/%02d/png/%s',
-                $imageMetadata->getDate()->format('Y'),
-                $imageMetadata->getDate()->format('m'),
-                $imageMetadata->getDate()->format('d'),
+                $year,
+                $month,
+                $day,
                 $filename,
             ),
         );
@@ -95,11 +99,13 @@ final readonly class EpicApi implements EpicApiInterface
         $this->logger->debug(sprintf('Downloaded image %s with %d bytes to directory %s', $imageMetadata->getImage(), \strlen($content), $targetFolder));
 
         if (!file_exists($targetFolder)) {
-            mkdir($targetFolder, 0o700);
+            mkdir($targetFolder, 0o700, true);
         }
 
         $filePathName = $targetFolder.\DIRECTORY_SEPARATOR.$filename;
 
         file_put_contents($filePathName, $content);
+
+        return $filePathName;
     }
 }

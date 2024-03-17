@@ -8,7 +8,10 @@ use App\Api\Nasa\Domain\ImageMetadata;
 
 interface EpicApiInterface
 {
-    public function getRecentImagesMetadata(): array;
+    /**
+     * @return array<ImageMetadata>
+     */
     public function getImagesMetadataByDate(\DateTimeInterface $dateTime): array;
-    public function downloadImage(ImageMetadata $imageMetadata, string $targetFolder): void;
+    public function downloadImage(ImageMetadata $imageMetadata, string $targetFolder): string;
+    public function getLastAvailableDate(): \DateTimeInterface;
 }
