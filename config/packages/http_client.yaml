@@ -1,0 +1,7 @@
+framework:
+    http_client:
+        scoped_clients:
+            nasa_epic_api:
+                base_uri: 'https://epic.gsfc.nasa.gov/'
+                headers:
+                    'X-API-KEY': '%env(NASA_EPIC_API_KEY)%'
